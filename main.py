@@ -38,7 +38,6 @@ def random_and_select():
 def select_type(name):
     """Function for select box only (This fucking box make this project waste of my time)."""
     question = questions_dict[name]
-    # select_container = question.find_element()
     select_container = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[role="listbox"]')))
 
     select_container.click()
@@ -81,11 +80,6 @@ for questions in questions:
        select_box = None
 
    if select_box:
-       # select_box.click()
-       #
-       # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
-
-       # btn: list[WebElement|str] = questions.find_elements(By.CSS_SELECTOR, '[role=option]')
        btn = ['select']
    else:
        btn = questions.find_elements(By.CSS_SELECTOR, '[aria-checked]')
@@ -101,4 +95,3 @@ for questions in questions:
 
 random_and_select()
 
-print(q_text_choice)
