@@ -36,21 +36,19 @@ def random_and_select():
 
 def select_type(name):
     """Function for select box only (This fucking box make this project waste of my time)."""
-    question = driver.find_element(By.CSS_SELECTOR, '[role="listitem"]')
+    question = questions_dict[name]
+    select_container = question.find_element(By.CSS_SELECTOR, '[role="listbox"]')
 
-    if question.find_element(By.CSS_SELECTOR, '.M7eMe').text == name:
-        select_container = questions.find_element(By.CSS_SELECTOR, '[role="listbox"]')
+    select_container.click()
 
-        select_container.click()
+    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
+    select: list[WebElement] = question.find_elements(By.CSS_SELECTOR, '[role=option]')
 
-        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
-        select: list[WebElement] = questions.find_elements(By.CSS_SELECTOR, '[role=option]')
-
+    choice = random.choice(select)
+    while choice == select[0]:
         choice = random.choice(select)
-        while choice == select[0]:
-            choice = random.choice(select)
-        print(choice)
-        choice.click()
+    print(choice)
+    choice.click()
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
 
@@ -66,11 +64,14 @@ wait = WebDriverWait(driver, 10)
 
 questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
 
+questions_dict = {}
 radio_btn = driver
 
 q_text_choice = {}
 for questions in questions:
    q_text = questions.find_element(By.CSS_SELECTOR, '.M7eMe').text
+
+   questions_dict[q_text] = questions
 
    try:
        select_box = questions.find_element(By.CSS_SELECTOR, '[role="listbox"]')
