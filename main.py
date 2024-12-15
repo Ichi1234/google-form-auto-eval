@@ -1,4 +1,5 @@
 import random
+import time
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -26,29 +27,30 @@ def random_and_select():
     for key, val in q_text_choice.items():
         if val[0] == 'select':
             select_type(key)
-            continue
 
-        choice = random.choice(val)
-        while isinstance(choice, str):
+        else:
             choice = random.choice(val)
-        print(choice.get_attribute('data-value'))
-        choice.click()
+            while isinstance(choice, str):
+                choice = random.choice(val)
+            print(choice.get_attribute('data-value'))
+            choice.click()
 
 def select_type(name):
     """Function for select box only (This fucking box make this project waste of my time)."""
     question = questions_dict[name]
-    select_container = question.find_element(By.CSS_SELECTOR, '[role="listbox"]')
+    # select_container = question.find_element()
+    select_container = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[role="listbox"]')))
 
     select_container.click()
 
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
     select: list[WebElement] = question.find_elements(By.CSS_SELECTOR, '[role=option]')
 
-    choice = random.choice(select)
-    while choice == select[0]:
-        choice = random.choice(select)
-    print(choice)
-    choice.click()
+    select_choice = random.choice(select)
+    while select_choice == select[0]:
+        select_choice = random.choice(select)
+    select_choice.click()
+    time.sleep(0.1)
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
 
