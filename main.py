@@ -66,37 +66,44 @@ class CheckBox(FieldTypeStrategy):
             select.click()
 
 
-def add_data_to_question(question_text: str,  data_list: list):
-    """Class for add choice to the question in q_text_choice dict."""
-    global q_text_choice
-    for data in data_list:
-        try:
-            if data.get_attribute('data-value') not in ['', '__other_option__']:
-                q_text_choice[question_text].append(data)
+class RadioBox(FieldTypeStrategy):
+    def run(self, question_text: str):
+        question = questions_dict[question_text]
+        radio_box = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
 
-        except AttributeError:
-            q_text_choice[question_text].append(data)
+        choice = random.choice(radio_box)
+        while choice.get_attribute("data-value") in ['', '__other_option__']:
+            choice = random.choice(radio_box)
+        choice.click()
 
 
 def random_and_select():
     """Class for random choice and select choice for every question."""
     global q_text_choice
     for key, val in q_text_choice.items():
-        if val[0] == 'select':
+        print(key, val)
+        if val == 'dropdown':
             SelectBox().run(key)
 
-        elif val[0] == 'check':
+        elif val == 'check':
             CheckBox().run(key)
 
-        elif val[0] == 'text':
+        elif val == 'text':
             TextBox().run(key)
-        else:
-            random.choice(val).click()
+
+        elif val == 'radio':
+            RadioBox().run(key)
 
 
 def loop_current_page():
     """Loop for each page."""
     global questions
+    field_type = {
+        'check': '[role="checkbox"]',
+        'dropdown': '[role="listbox"]',
+        'radio': '[role="radio"]',
+        'text': '[type="text"]',
+    }
     for question in questions:
         try:
             q_text = question.find_element(By.CSS_SELECTOR, '[class="M7eMe"]').text
@@ -106,38 +113,18 @@ def loop_current_page():
         except NoSuchElementException:
             q_text = None
 
-        try:
-            select_box = question.find_element(By.CSS_SELECTOR, '[role="listbox"]')
-        except NoSuchElementException:
-            select_box = None
+        question_type = None
+        for key, val in field_type.items():
+            try:
+                question.find_element(By.CSS_SELECTOR, val)
+                question_type = key
+                break
 
-        try:
-            check_box = question.find_element(By.CSS_SELECTOR, '[role="checkbox"]')
-
-        except NoSuchElementException:
-            check_box = None
-
-        try:
-            text_box = question.find_element(By.CSS_SELECTOR, '[type="text"]')
-
-        except NoSuchElementException:
-            text_box = None
-
-        if select_box:
-            btn = ['select']
-
-        elif check_box:
-            btn = ['check']
-
-        elif text_box:
-            btn = ['text']
-
-        else:
-            btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
+            except NoSuchElementException:
+                pass
 
         if q_text is not None:
-            q_text_choice[q_text] = []
-            add_data_to_question(q_text, btn)
+            q_text_choice[q_text] = question_type
 
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
@@ -162,6 +149,7 @@ for _ in range(3):
     q_text_choice = {}
 
     loop_current_page()
+    print(q_text_choice)
     random_and_select()
 
     next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
