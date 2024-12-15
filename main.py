@@ -23,19 +23,22 @@ def random_and_select():
     global q_text_choice
     for key, val in q_text_choice.items():
         if val[0] == 'select':
-            val[1].click()
-            wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
-        print(val)
+            select_type(key)
+            continue
+
         choice = random.choice(val)
         while isinstance(choice, str):
             choice = random.choice(val)
         print(choice.get_attribute('data-value'))
         choice.click()
 
-def select_box(name):
+def select_type(name):
     question = driver.find_element(By.CSS_SELECTOR, '[role="listitem"]')
+
     if question.find_element(By.CSS_SELECTOR, '.M7eMe').text == name:
-        select_box.click()
+        select_container = questions.find_element(By.CSS_SELECTOR, '[role="listbox"]')
+
+        select_container.click()
 
         wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
         select: list[WebElement] = questions.find_elements(By.CSS_SELECTOR, '[role=option]')
@@ -43,7 +46,7 @@ def select_box(name):
         choice = random.choice(select)
         while choice == select[0]:
             choice = random.choice(select)
-
+        print(choice)
         choice.click()
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
@@ -72,14 +75,12 @@ for questions in questions:
        select_box = None
 
    if select_box:
-       select_box.click()
+       # select_box.click()
+       #
+       # wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
 
-       wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]'))       )
-
-       btn: list[WebElement|str] = questions.find_elements(By.CSS_SELECTOR, '[role=option]')
-       btn.insert(0, select_box)
-       btn.insert(0, 'select')
-
+       # btn: list[WebElement|str] = questions.find_elements(By.CSS_SELECTOR, '[role=option]')
+       btn = ['select']
    else:
        btn = questions.find_elements(By.CSS_SELECTOR, '[aria-checked]')
 
