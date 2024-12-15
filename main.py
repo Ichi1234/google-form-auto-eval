@@ -26,8 +26,12 @@ def random_and_select():
     """Class for random choice and select choice for every question."""
     global q_text_choice
     for key, val in q_text_choice.items():
+        print(key, val)
         if val[0] == 'select':
             select_type(key)
+
+        elif val[0] == 'check':
+            checkbox_type(key)
 
         else:
             random.choice(val).click()
@@ -40,6 +44,7 @@ def select_type(name):
 
     select_container.click()
 
+    # For me in the future if my code is error it because google change class name.
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
     select: list[WebElement] = question.find_elements(By.CSS_SELECTOR, '[role=option]')
 
@@ -49,33 +54,59 @@ def select_type(name):
     select_choice.click()
     time.sleep(0.1)
 
+def checkbox_type(name):
+    question = questions_dict[name]
+    check_box = question.find_elements(By.CSS_SELECTOR, '[role="checkbox"]')
+    check_box[1].click()
+    check_box[2].click()
+    check_box[3].click()
+
 
 def loop_current_page():
     """Loop for each page."""
     global questions
     for question in questions:
-        q_text = question.find_element(By.CSS_SELECTOR, '.M7eMe').text
+        try:
+            q_text = question.find_element(By.CSS_SELECTOR, '[class="M7eMe"]').text
 
-        questions_dict[q_text] = question
+            questions_dict[q_text] = question
+
+        except NoSuchElementException:
+            q_text = None
 
         try:
             select_box = question.find_element(By.CSS_SELECTOR, '[role="listbox"]')
         except NoSuchElementException:
             select_box = None
 
+        try:
+            check_box = question.find_element(By.CSS_SELECTOR, '[role="checkbox"]')
+            # for i in check_box:
+            #     print(i.get_attribute("data-answer-value"))
+        except NoSuchElementException:
+            check_box = None
+
         if select_box:
             btn = ['select']
+
+        elif check_box:
+            btn = ['check']
+
         else:
             btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
+            for i in btn:
+                print(i.get_attribute("data-value"))
 
-        # Create ActionChains object
-        actions = ActionChains(driver)
+        # # Create ActionChains object
+        # actions = ActionChains(driver)
+        #
+        # # Perform a click at (x, y) coordinates
+        # actions.move_by_offset(30, 34).click().perform()
 
-        # Perform a click at (x, y) coordinates
-        actions.move_by_offset(30, 34).click().perform()
-
-        q_text_choice[q_text] = []
-        add_data_to_question(q_text, btn)
+        if q_text is not None:
+            q_text_choice[q_text] = []
+            print(q_text_choice)
+            add_data_to_question(q_text, btn)
 
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
@@ -88,15 +119,22 @@ chrom_options.add_experimental_option("detach", True)
 driver = webdriver.Chrome(options=chrom_options)
 driver.get(url)
 
-wait = WebDriverWait(driver, 10)
+wait = WebDriverWait(driver, 15)
 
-questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
+for _ in range(2):
+    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="M7eMe"]')))
 
-questions_dict = {}
-radio_btn = driver
+    questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
 
-q_text_choice = {}
+    questions_dict = {}
 
-loop_current_page()
-random_and_select()
+    q_text_choice = {}
+
+    loop_current_page()
+    random_and_select()
+
+    next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
+    next_btn.click()
+
+    time.sleep(0.14)
 
