@@ -1,12 +1,69 @@
 import time
 import random
 
+from abc import ABC, abstractmethod
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
+
+
+class FieldTypeStrategy(ABC):
+    """Abstract base class for field handling strategies."""
+
+    @abstractmethod
+    def run(self, question_text: str):
+        pass
+
+
+class SelectBox(FieldTypeStrategy):
+    """Handles selection of options in dropdown fields."""
+
+    def run(self, question_text: str):
+        """Select one of the option"""
+        question = questions_dict[question_text]
+        select_container = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[role="listbox"]')))
+
+        select_container.click()
+
+        # For me in the future if my code is error it because google change class name.
+        wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
+        select: list[WebElement] = question.find_elements(By.CSS_SELECTOR, '[role=option]')
+
+        select_choice = random.choice(select)
+        while select_choice == select[0]:
+            select_choice = random.choice(select)
+        select_choice.click()
+        time.sleep(0.1)
+
+
+class TextBox(FieldTypeStrategy):
+    """Handles input of text into text fields."""
+
+    def run(self, question_text: str):
+        """Type word it to the text field."""
+        question = questions_dict[question_text]
+        text_box = question.find_element(By.CSS_SELECTOR, '[type="text"]')
+        text_box.send_keys('-')
+
+
+class CheckBox(FieldTypeStrategy):
+    """Handles selection of multiple options in checkbox fields."""
+
+    def run(self, question_text: str):
+        """Random number to select 1 to n_options."""
+        question = questions_dict[question_text]
+        check_box = question.find_elements(By.CSS_SELECTOR, '[role="checkbox"]')
+        maximum_check = random.randint(1, len(check_box))
+        select_box = []
+        for _ in range(maximum_check):
+            select = random.choice(check_box)
+            while select in select_box or select.get_attribute("data-answer-value") in ['', '__other_option__']:
+                print(select.get_attribute("data-answer-value"))
+                select = random.choice(check_box)
+            select.click()
 
 
 def add_data_to_question(question_text: str,  data_list: list):
@@ -26,54 +83,16 @@ def random_and_select():
     global q_text_choice
     for key, val in q_text_choice.items():
         if val[0] == 'select':
-            select_type(key)
+            SelectBox().run(key)
 
         elif val[0] == 'check':
-            checkbox_type(key)
+            CheckBox().run(key)
 
         elif val[0] == 'text':
-            text_type(key)
-
+            TextBox().run(key)
         else:
             random.choice(val).click()
 
-
-def select_type(name):
-    """Function for select box only (This fucking box make this project waste of my time)."""
-    question = questions_dict[name]
-    select_container = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[role="listbox"]')))
-
-    select_container.click()
-
-    # For me in the future if my code is error it because google change class name.
-    wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.OA0qNb.ncFHed.QXL7Te [aria-selected="false"]')))
-    select: list[WebElement] = question.find_elements(By.CSS_SELECTOR, '[role=option]')
-
-    select_choice = random.choice(select)
-    while select_choice == select[0]:
-        select_choice = random.choice(select)
-    select_choice.click()
-    time.sleep(0.1)
-
-def checkbox_type(name):
-    """Function for checkbox."""
-    question = questions_dict[name]
-    check_box = question.find_elements(By.CSS_SELECTOR, '[role="checkbox"]')
-    maximum_check = random.randint(1, len(check_box))
-    select_box = []
-    for _ in range(maximum_check):
-        select = random.choice(check_box)
-        while select in select_box or select.get_attribute("data-answer-value") in  ['', '__other_option__']:
-            print(select.get_attribute("data-answer-value"))
-            select = random.choice(check_box)
-        select.click()
-
-
-def text_type(name):
-    """Function for text box."""
-    question = questions_dict[name]
-    text_box = question.find_element(By.CSS_SELECTOR, '[type="text"]')
-    text_box.send_keys('-')
 
 def loop_current_page():
     """Loop for each page."""
@@ -94,8 +113,7 @@ def loop_current_page():
 
         try:
             check_box = question.find_element(By.CSS_SELECTOR, '[role="checkbox"]')
-            # for i in check_box:
-            #     print(i.get_attribute("data-answer-value"))
+
         except NoSuchElementException:
             check_box = None
 
@@ -116,14 +134,6 @@ def loop_current_page():
 
         else:
             btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
-            # for i in btn:
-            #     print(i.get_attribute("data-value"))
-
-        # # Create ActionChains object
-        # actions = ActionChains(driver)
-        #
-        # # Perform a click at (x, y) coordinates
-        # actions.move_by_offset(30, 34).click().perform()
 
         if q_text is not None:
             q_text_choice[q_text] = []
