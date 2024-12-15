@@ -31,6 +31,9 @@ def random_and_select():
         elif val[0] == 'check':
             checkbox_type(key)
 
+        elif val[0] == 'text':
+            text_type(key)
+
         else:
             random.choice(val).click()
 
@@ -66,6 +69,12 @@ def checkbox_type(name):
         select.click()
 
 
+def text_type(name):
+    """Function for text box."""
+    question = questions_dict[name]
+    text_box = question.find_element(By.CSS_SELECTOR, '[type="text"]')
+    text_box.send_keys('-')
+
 def loop_current_page():
     """Loop for each page."""
     global questions
@@ -90,11 +99,20 @@ def loop_current_page():
         except NoSuchElementException:
             check_box = None
 
+        try:
+            text_box = question.find_element(By.CSS_SELECTOR, '[type="text"]')
+
+        except NoSuchElementException:
+            text_box = None
+
         if select_box:
             btn = ['select']
 
         elif check_box:
             btn = ['check']
+
+        elif text_box:
+            btn = ['text']
 
         else:
             btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
@@ -124,7 +142,7 @@ driver.get(url)
 
 wait = WebDriverWait(driver, 15)
 
-for _ in range(2):
+for _ in range(3):
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="M7eMe"]')))
 
     questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
@@ -137,7 +155,9 @@ for _ in range(2):
     random_and_select()
 
     next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
-    next_btn.click()
+
+    if _ != 2:
+        next_btn.click()
 
     time.sleep(0.14)
 
