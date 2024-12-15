@@ -125,12 +125,33 @@ def loop_current_page():
                 pass
 
 
+loop_range = int(input("How many submit do you want? \n"))
 
+while loop_range < 1:
+    print(f"{loop_range}??? WTF do you mean??")
+    loop_range = int(input("How many submit do you want? \n"))
+
+is_not_auto = False
+if loop_range == 1:
+    is_not_auto = input("Since, you input 1.\n"
+                             "Do you want to check the answer first"
+                             " before submit? (True/False)\n").lower()
+
+    while is_not_auto not in ['true', 'false']:
+        print("PLEASE TYPE TRUE OR FALSE")
+        is_not_auto = input("Since, you input 1.\n"
+                                 "Do you want to check the answer first"
+                                 " before submit? (True/False)\n").lower()
+
+if is_not_auto == 'true':
+    is_not_auto = True
+
+elif is_not_auto == 'false':
+    is_not_auto = False
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
 
 
-# Keep chrome open after program finishes
 chrom_options = webdriver.ChromeOptions()
 chrom_options.add_experimental_option("detach", True)
 
@@ -139,7 +160,8 @@ driver.get(url)
 
 wait = WebDriverWait(driver, 15)
 
-while True:
+
+while loop_range:
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="M7eMe"]')))
 
     questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
@@ -154,9 +176,15 @@ while True:
 
     except NoSuchElementException:
         submit_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="M2UYVd"]')
-        print(submit_btn.get_attribute("aria-label"))
-        break
-        # driver.get(url)
+
+        if not is_not_auto:
+            submit_btn.click()
+            driver.get(url)
+        else:
+            break
+
+        loop_range -= 1
+
 
     time.sleep(0.14)
 
