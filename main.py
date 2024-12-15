@@ -1,5 +1,5 @@
-import random
 import time
+import random
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
+
 
 def add_data_to_question(question_text: str,  data_list: list):
     """Class for add choice to the question in q_text_choice dict."""
@@ -29,11 +30,8 @@ def random_and_select():
             select_type(key)
 
         else:
-            choice = random.choice(val)
-            while isinstance(choice, str):
-                choice = random.choice(val)
-            print(choice.get_attribute('data-value'))
-            choice.click()
+            random.choice(val).click()
+
 
 def select_type(name):
     """Function for select box only (This fucking box make this project waste of my time)."""
