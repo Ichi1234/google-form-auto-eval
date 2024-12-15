@@ -133,7 +133,7 @@ driver.get(url)
 
 wait = WebDriverWait(driver, 15)
 
-for _ in range(3):
+while True:
     wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[class="M7eMe"]')))
 
     questions = driver.find_elements(By.CSS_SELECTOR, '[role="listitem"]')
@@ -142,10 +142,15 @@ for _ in range(3):
 
     loop_current_page()
 
-    next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
-
-    if _ != 2:
+    try:
+        next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
         next_btn.click()
+
+    except NoSuchElementException:
+        submit_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="M2UYVd"]')
+        print(submit_btn.get_attribute("aria-label"))
+        break
+        # driver.get(url)
 
     time.sleep(0.14)
 
