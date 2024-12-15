@@ -67,7 +67,10 @@ class CheckBox(FieldTypeStrategy):
 
 
 class RadioBox(FieldTypeStrategy):
+    """Handles selection of one option in radio box fields."""
+
     def run(self, question_text: str):
+        """Random choice and select it."""
         question = questions_dict[question_text]
         radio_box = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
 
@@ -75,24 +78,6 @@ class RadioBox(FieldTypeStrategy):
         while choice.get_attribute("data-value") in ['', '__other_option__']:
             choice = random.choice(radio_box)
         choice.click()
-
-
-def random_and_select():
-    """Class for random choice and select choice for every question."""
-    global q_text_choice
-    for key, val in q_text_choice.items():
-        print(key, val)
-        if val == 'dropdown':
-            SelectBox().run(key)
-
-        elif val == 'check':
-            CheckBox().run(key)
-
-        elif val == 'text':
-            TextBox().run(key)
-
-        elif val == 'radio':
-            RadioBox().run(key)
 
 
 def loop_current_page():
@@ -104,6 +89,13 @@ def loop_current_page():
         'radio': '[role="radio"]',
         'text': '[type="text"]',
     }
+
+    field_strategy = {
+        'check': CheckBox,
+        'dropdown': SelectBox,
+        'text': TextBox,
+        'radio': RadioBox,
+    }
     for question in questions:
         try:
             q_text = question.find_element(By.CSS_SELECTOR, '[class="M7eMe"]').text
@@ -113,18 +105,20 @@ def loop_current_page():
         except NoSuchElementException:
             q_text = None
 
-        question_type = None
         for key, val in field_type.items():
             try:
                 question.find_element(By.CSS_SELECTOR, val)
                 question_type = key
+
+                if q_text:
+                    field_strategy[question_type]().run(q_text)
+
                 break
 
             except NoSuchElementException:
                 pass
 
-        if q_text is not None:
-            q_text_choice[q_text] = question_type
+
 
 
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
@@ -146,11 +140,7 @@ for _ in range(3):
 
     questions_dict = {}
 
-    q_text_choice = {}
-
     loop_current_page()
-    print(q_text_choice)
-    random_and_select()
 
     next_btn = driver.find_element(By.CSS_SELECTOR, '[jsname="OCpkoe"]')
 
