@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
 
@@ -26,7 +25,6 @@ def random_and_select():
     """Class for random choice and select choice for every question."""
     global q_text_choice
     for key, val in q_text_choice.items():
-        print(key, val)
         if val[0] == 'select':
             select_type(key)
 
@@ -55,11 +53,17 @@ def select_type(name):
     time.sleep(0.1)
 
 def checkbox_type(name):
+    """Function for checkbox."""
     question = questions_dict[name]
     check_box = question.find_elements(By.CSS_SELECTOR, '[role="checkbox"]')
-    check_box[1].click()
-    check_box[2].click()
-    check_box[3].click()
+    maximum_check = random.randint(1, len(check_box))
+    select_box = []
+    for _ in range(maximum_check):
+        select = random.choice(check_box)
+        while select in select_box or select.get_attribute("data-answer-value") in  ['', '__other_option__']:
+            print(select.get_attribute("data-answer-value"))
+            select = random.choice(check_box)
+        select.click()
 
 
 def loop_current_page():
@@ -94,8 +98,8 @@ def loop_current_page():
 
         else:
             btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
-            for i in btn:
-                print(i.get_attribute("data-value"))
+            # for i in btn:
+            #     print(i.get_attribute("data-value"))
 
         # # Create ActionChains object
         # actions = ActionChains(driver)
@@ -105,7 +109,6 @@ def loop_current_page():
 
         if q_text is not None:
             q_text_choice[q_text] = []
-            print(q_text_choice)
             add_data_to_question(q_text, btn)
 
 
