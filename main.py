@@ -56,14 +56,20 @@ class CheckBox(FieldTypeStrategy):
         """Random number to select 1 to n_options."""
         question = questions_dict[question_text]
         check_box = question.find_elements(By.CSS_SELECTOR, '[role="checkbox"]')
+
+        check_box = [cb for cb in check_box if cb.get_attribute("data-answer-value") not in ['', '__other_option__']]
+
         maximum_check = random.randint(1, len(check_box))
         select_box = []
         for _ in range(maximum_check):
             select = random.choice(check_box)
-            while select in select_box or select.get_attribute("data-answer-value") in ['', '__other_option__']:
-                print(select.get_attribute("data-answer-value"))
+            while select in select_box:
                 select = random.choice(check_box)
+            select_box.append(select)
+
             select.click()
+
+            time.sleep(0.1)
 
 
 class RadioBox(FieldTypeStrategy):
