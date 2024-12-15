@@ -49,6 +49,35 @@ def select_type(name):
     select_choice.click()
     time.sleep(0.1)
 
+
+def loop_current_page():
+    """Loop for each page."""
+    global questions
+    for question in questions:
+        q_text = question.find_element(By.CSS_SELECTOR, '.M7eMe').text
+
+        questions_dict[q_text] = question
+
+        try:
+            select_box = question.find_element(By.CSS_SELECTOR, '[role="listbox"]')
+        except NoSuchElementException:
+            select_box = None
+
+        if select_box:
+            btn = ['select']
+        else:
+            btn = question.find_elements(By.CSS_SELECTOR, '[aria-checked]')
+
+        # Create ActionChains object
+        actions = ActionChains(driver)
+
+        # Perform a click at (x, y) coordinates
+        actions.move_by_offset(30, 34).click().perform()
+
+        q_text_choice[q_text] = []
+        add_data_to_question(q_text, btn)
+
+
 url = "https://forms.gle/3r2Lxe6vTqKLdQfJ6"
 
 
@@ -67,29 +96,7 @@ questions_dict = {}
 radio_btn = driver
 
 q_text_choice = {}
-for questions in questions:
-   q_text = questions.find_element(By.CSS_SELECTOR, '.M7eMe').text
 
-   questions_dict[q_text] = questions
-
-   try:
-       select_box = questions.find_element(By.CSS_SELECTOR, '[role="listbox"]')
-   except NoSuchElementException:
-       select_box = None
-
-   if select_box:
-       btn = ['select']
-   else:
-       btn = questions.find_elements(By.CSS_SELECTOR, '[aria-checked]')
-
-   # Create ActionChains object
-   actions = ActionChains(driver)
-
-   # Perform a click at (x, y) coordinates
-   actions.move_by_offset(30, 34).click().perform()
-
-   q_text_choice[q_text] = []
-   add_data_to_question(q_text, btn)
-
+loop_current_page()
 random_and_select()
 
