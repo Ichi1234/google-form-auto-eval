@@ -9,6 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
 def add_data_to_question(question_text: str,  data_list: list):
+    """Class for add choice to the question in q_text_choice dict."""
     global q_text_choice
     for data in data_list:
         try:
@@ -20,6 +21,7 @@ def add_data_to_question(question_text: str,  data_list: list):
 
 
 def random_and_select():
+    """Class for random choice and select choice for every question."""
     global q_text_choice
     for key, val in q_text_choice.items():
         if val[0] == 'select':
@@ -33,6 +35,7 @@ def random_and_select():
         choice.click()
 
 def select_type(name):
+    """Function for select box only (This fucking box make this project waste of my time)."""
     question = driver.find_element(By.CSS_SELECTOR, '[role="listitem"]')
 
     if question.find_element(By.CSS_SELECTOR, '.M7eMe').text == name:
